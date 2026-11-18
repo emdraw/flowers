@@ -125,10 +125,23 @@
   .env .paper {
     left: 7%; right: 7%; top: 6%; height: 86%; z-index: 1; box-sizing: border-box; overflow: hidden;
     background: var(--paper); border-radius: 6px;
-    display: grid; justify-items: center; align-content: start; padding-top: 9%;
-    transition: transform .8s cubic-bezier(.3,.8,.3,1);
+    display: grid; justify-items: center; align-content: start; gap: 5px;
+    padding: 7% 9% 0; text-align: center; color: var(--paper-ink);
+    border-top: 4px solid var(--paper-accent);
+    transition: transform .9s cubic-bezier(.3,.8,.3,1);
   }
-  .env .paper span { font-family: var(--font-script); font-size: clamp(1.5rem, 7vw, 2rem); color: var(--paper-accent); }
+  .env .paper .p-to { font-family: var(--font-script); font-size: clamp(1.2rem, 5.6vw, 1.5rem); color: var(--paper-accent); }
+  .env .paper .p-msg { font-size: clamp(.62rem, 2.9vw, .74rem); line-height: 1.5; }
+  .env .paper .p-sign { justify-self: end; font-family: var(--font-script); font-size: clamp(.9rem, 4vw, 1.05rem); color: var(--paper-accent); }
+  .env.fade { opacity: 0; transition: opacity .4s ease; }
+  .env.fade .paper { visibility: hidden; }
+  .card-wrap {
+    position: fixed; inset: 0; z-index: 2; display: grid; place-items: center; pointer-events: none;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  .card-wrap .card { pointer-events: auto; }
+  [hidden] { display: none !important; }
   .card {
     width: min(100%, 360px); box-sizing: border-box;
     background: var(--paper); color: var(--paper-ink);
@@ -136,9 +149,7 @@
     padding: 30px 26px 24px;
     display: grid; gap: 14px; justify-items: center; text-align: center;
     border-top: 6px solid var(--paper-accent);
-    animation: unfold .8s cubic-bezier(.2,.9,.3,1.1) both;
   }
-  @keyframes unfold { from { transform: translateY(40px) scale(.7); opacity: 0; } to { transform: none; opacity: 1; } }
   .card .to { margin: 0 0 4px; font-family: var(--font-script); font-size: clamp(1.8rem, 8vw, 2.2rem); color: var(--paper-accent); }
   .card .msg { margin: 0; font-size: 1.05rem; line-height: 1.6; max-width: 28ch; text-wrap: pretty; }
   .card .sign { margin: 0; justify-self: end; font-family: var(--font-script); font-size: 1.5rem; color: var(--paper-accent); }
@@ -187,17 +198,23 @@
 <div class="letter-screen" id="letter">
   <button class="env" id="env" type="button" aria-label="Abrir la carta para Agama">
     <span class="back"></span>
-    <span class="paper"><span>Para: Agama</span><i></i><i></i><i></i></span>
+    <span class="paper">
+      <span class="p-to">Para: Agama</span>
+      <span class="p-msg">«Yo vi esta flor y pensé en ti porque es bonita, y bueno, en realidad a mí no me gusta, pero creí que te gustaría porque tú sí eres bonita».</span>
+      <span class="p-sign">-Shrek</span>
+    </span>
     <span class="pocket"><span>Para: Agama</span></span>
     <span class="flap"></span>
     <span class="seal" aria-hidden="true">✿</span>
   </button>
   <p class="hint" id="hint">Toca la carta para abrirla</p>
-  <div class="card" id="card" hidden>
+  <div class="card-wrap" id="cardWrap" hidden>
+  <div class="card" id="card">
     <p class="to">Para: Agama</p>
     <p class="msg">«Yo vi esta flor y pensé en ti porque es bonita, y bueno, en realidad a mí no me gusta, pero creí que te gustaría porque tú sí eres bonita».</p>
     <p class="sign">-Shrek</p>
     <button id="go" type="button">Ver tus flores ✿</button>
+  </div>
   </div>
 </div>
 <main id="main">
@@ -442,11 +459,17 @@
     env.classList.add("open");
     setTimeout(() => env.classList.add("out"), quick ? 0 : 650);
     setTimeout(() => {
-      env.hidden = true;
-      document.getElementById("hint").hidden = true;
-      card.hidden = false;
-      document.getElementById("go").focus({ preventScroll: true });
-    }, quick ? 0 : 1500);
+      const from = env.querySelector(".paper").getBoundingClientRect();
+      document.getElementById("cardWrap").hidden = false;
+      env.classList.add("fade");
+      if (!quick) {
+        const to = card.getBoundingClientRect();
+        card.animate([
+          { transformOrigin: "top left", transform: `translate(${from.left - to.left}px, ${from.top - to.top}px) scale(${from.width / to.width})` },
+          { transformOrigin: "top left", transform: "none" }
+        ], { duration: 800, easing: "cubic-bezier(.2,.8,.2,1)" });
+      }
+    }, quick ? 0 : 2100);
   });
   const card = document.getElementById("card");
   document.getElementById("go").addEventListener("click", () => {
