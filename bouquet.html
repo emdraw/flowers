@@ -141,6 +141,7 @@
   @keyframes unfold { from { transform: translateY(40px) scale(.7); opacity: 0; } to { transform: none; opacity: 1; } }
   .card .to { margin: 0 0 4px; font-family: var(--font-script); font-size: clamp(1.8rem, 8vw, 2.2rem); color: var(--paper-accent); }
   .card .msg { margin: 0; font-size: 1.05rem; line-height: 1.6; max-width: 28ch; text-wrap: pretty; }
+  .card .sign { margin: 0; justify-self: end; font-family: var(--font-script); font-size: 1.5rem; color: var(--paper-accent); }
   .card button {
     margin-top: 8px; border: 0; border-radius: 999px; padding: 12px 22px;
     background: var(--paper-accent); color: var(--paper); font: 600 1rem var(--font-body); cursor: pointer;
@@ -194,9 +195,8 @@
   <p class="hint" id="hint">Toca la carta para abrirla</p>
   <div class="card" id="card" hidden>
     <p class="to">Para: Agama</p>
-    <p class="msg">Vi estas flores y pensé que te iban a sacar una sonrisa.</p>
-    <p class="msg">Ojalá tu día esté tan bonito como ellas, y que nunca te falten motivos para reír así como ríes.</p>
-    <p class="msg">Gracias por hacer los días un poquito más ligeros, aunque no te des cuenta.</p>
+    <p class="msg">«Yo vi esta flor y pensé en ti porque es bonita, y bueno, en realidad a mí no me gusta, pero creí que te gustaría porque tú sí eres bonita».</p>
+    <p class="sign">-Shrek</p>
     <button id="go" type="button">Ver tus flores ✿</button>
   </div>
 </div>
