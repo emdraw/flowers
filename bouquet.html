@@ -14,6 +14,8 @@
     --accent: #d9467a;
     --glow: rgba(255, 255, 255, .7);
     --petal-fall: #f3a6bf;
+    --env: #f9c9d7; --env-dark: #eaa7bc; --env-flap: #f4b6c9;
+    --paper: #fffaf6; --paper-line: #f0c9d6; --shadow: rgba(150, 50, 90, .25);
     --font-script: "Petit Formal Script", "Snell Roundhand", "Apple Chancery", cursive;
     --font-body: "Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;
   }
@@ -21,11 +23,15 @@
     :root:not([data-theme="light"]) {
       --bg-top: #2b1622; --bg-bottom: #1a0d15; --ink: #fbe4ec; --ink-soft: #d7a6b8;
       --accent: #ff7fa8; --glow: rgba(255, 170, 200, .16); --petal-fall: #c9628a; color-scheme: dark;
+      --env: #f2b8ca; --env-dark: #c97d97; --env-flap: #e49ab3;
+      --paper: #fff6f2; --paper-line: #f0c9d6; --shadow: rgba(0, 0, 0, .45);
     }
   }
   :root[data-theme="dark"] {
     --bg-top: #2b1622; --bg-bottom: #1a0d15; --ink: #fbe4ec; --ink-soft: #d7a6b8;
     --accent: #ff7fa8; --glow: rgba(255, 170, 200, .16); --petal-fall: #c9628a; color-scheme: dark;
+    --env: #f2b8ca; --env-dark: #c97d97; --env-flap: #e49ab3;
+    --paper: #fff6f2; --paper-line: #f0c9d6; --shadow: rgba(0, 0, 0, .45);
   }
   html, body { height: 100%; }
   body {
@@ -90,23 +96,86 @@
     0% { transform: translate(0, -5vh) rotate(0); }
     100% { transform: translate(var(--dx, 40px), 110vh) rotate(540deg); }
   }
-  .heart {
-    position: fixed; pointer-events: none; z-index: 5; font-size: 22px; line-height: 1;
-    color: var(--accent); animation: rise 1.6s ease-out forwards;
+  /* el ramo espera a que se abra la carta */
+  .bloom { animation-play-state: paused; }
+  main.opened .bloom { animation-play-state: running; }
+
+  /* carta */
+  .letter-screen {
+    position: fixed; inset: 0; z-index: 10;
+    display: grid; place-items: center; align-content: center; gap: 22px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    background: linear-gradient(180deg, var(--bg-top), var(--bg-bottom));
+    background-color: var(--bg-bottom);
+    transition: opacity .7s ease, visibility .7s;
   }
-  @keyframes rise {
-    0% { transform: translate(-50%, -50%) scale(.4); opacity: 0; }
-    15% { opacity: 1; }
-    100% { transform: translate(calc(-50% + var(--hx)), calc(-50% - 120px)) scale(1.1); opacity: 0; }
+  .letter-screen.gone { opacity: 0; visibility: hidden; }
+  .env {
+    position: relative; width: min(86vw, 360px); max-width: 100%; aspect-ratio: 1.45;
+    perspective: 900px; cursor: pointer; border: 0; padding: 0; background: none;
+    font: inherit; color: inherit; -webkit-tap-highlight-color: transparent;
+    animation: float 3.5s ease-in-out infinite;
   }
+  .env:focus-visible { outline: 3px solid var(--accent); outline-offset: 8px; border-radius: 8px; }
+  @keyframes float { 0%,100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-8px) rotate(1deg); } }
+  .env .back, .env .pocket, .env .flap, .env .paper { position: absolute; border-radius: 8px; }
+  .env .back { inset: 0; background: var(--env-dark); box-shadow: 0 18px 40px var(--shadow); }
+  .env .paper {
+    left: 7%; right: 7%; top: 6%; height: 86%; z-index: 1; box-sizing: border-box; overflow: hidden;
+    background: var(--paper); border-radius: 6px;
+    display: grid; justify-items: center; align-content: start; padding-top: 9%;
+    transition: transform .8s cubic-bezier(.3,.8,.3,1);
+  }
+  .env .paper span { font-family: var(--font-script); font-size: clamp(1.5rem, 7vw, 2rem); color: var(--accent); }
+  .env .paper i { display: block; width: 60%; height: 1px; background: var(--paper-line); margin-top: 14px; }
+  .env .pocket {
+    inset: 0; z-index: 2; background: var(--env);
+    clip-path: polygon(0 0, 50% 52%, 100% 0, 100% 100%, 0 100%);
+    display: grid; place-items: end center; padding-bottom: 11%;
+  }
+  .env .pocket span {
+    font-family: var(--font-script); font-size: clamp(1.7rem, 8vw, 2.3rem); color: var(--ink);
+  }
+  .env .flap {
+    left: 0; right: 0; top: 0; height: 58%; z-index: 3;
+    background: var(--env-flap); border-radius: 8px 8px 0 0;
+    clip-path: polygon(0 0, 100% 0, 50% 100%);
+    transform-origin: top center; transition: transform .7s ease, z-index 0s .35s;
+  }
+  .env .seal {
+    position: absolute; left: 50%; top: 58%; z-index: 4; width: 46px; height: 46px;
+    transform: translate(-50%, -50%); border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #ff8fb4, #c2185b);
+    box-shadow: 0 3px 8px var(--shadow); color: #ffe3ec; font-size: 22px;
+    display: grid; place-items: center; transition: opacity .3s ease;
+  }
+  .env.open { animation: none; }
+  .env.open .flap { transform: rotateX(180deg); z-index: 0; }
+  .env.open .seal { opacity: 0; }
+  .env.out .paper { transform: translateY(-55%); }
+  .hint { margin: 0; font-size: .95rem; color: var(--ink-soft); letter-spacing: .04em; transition: opacity .3s; }
+  .env.open + .hint { opacity: 0; }
+
   @media (prefers-reduced-motion: reduce) {
+    .env { animation: none; }
     .sway, .bloom, .fall span, .flower.pop { animation: none !important; }
     .fall { display: none; }
   }
 </style>
 
 <div class="fall" id="fall" aria-hidden="true"></div>
-<main>
+<div class="letter-screen" id="letter">
+  <button class="env" id="env" type="button" aria-label="Abrir la carta para Agama">
+    <span class="back"></span>
+    <span class="paper"><span>Para: Agama</span><i></i><i></i><i></i></span>
+    <span class="pocket"><span>Para: Agama</span></span>
+    <span class="flap"></span>
+    <span class="seal" aria-hidden="true">✿</span>
+  </button>
+  <p class="hint">Toca la carta para abrirla</p>
+</div>
+<main id="main">
   <header>
     <h1>Para ti</h1>
     <p class="sub">rosas, tulipanes y gerberas</p>
@@ -164,7 +233,6 @@
       </g>
     </svg>
   </div>
-  <p class="note">Toca una flor <b>♥</b></p>
 </main>
 
 <script>
@@ -284,29 +352,45 @@
   // --- composición ---
   const items = [
     // tipo, x, y, extra
-    ["tulip", 200, 78, 1, 0],
-    ["tulip", 128, 112, .95, -18],
-    ["tulip", 276, 104, .95, 16],
-    ["tulip", 58, 236, .9, -42],
-    ["tulip", 344, 228, .9, 40],
-    ["gerbera", 82, 176, 36, "coral"],
-    ["gerbera", 318, 166, 36, "yellow"],
-    ["gerbera", 166, 158, 34, "hot"],
-    ["gerbera", 240, 150, 33, "peach"],
-    ["gerbera", 96, 278, 32, "yellow"],
-    ["gerbera", 308, 272, 32, "coral"],
-    ["rose", 202, 206, 34],
-    ["rose", 138, 228, 31],
-    ["rose", 268, 222, 31],
-    ["rose", 200, 272, 33],
-    ["rose", 150, 296, 29],
-    ["rose", 252, 296, 29],
+    ["tulip", 200, 70, 1, 0],
+    ["tulip", 160, 84, .9, -10],
+    ["tulip", 242, 82, .9, 10],
+    ["tulip", 118, 108, .95, -20],
+    ["tulip", 284, 102, .95, 18],
+    ["tulip", 76, 140, .85, -30],
+    ["tulip", 326, 134, .85, 30],
+    ["tulip", 48, 238, .9, -45],
+    ["tulip", 352, 230, .9, 44],
+    ["gerbera", 78, 186, 36, "coral"],
+    ["gerbera", 322, 178, 36, "yellow"],
+    ["gerbera", 160, 150, 34, "hot"],
+    ["gerbera", 244, 146, 33, "peach"],
+    ["gerbera", 202, 124, 31, "yellow"],
+    ["gerbera", 120, 160, 28, "peach"],
+    ["gerbera", 284, 156, 28, "hot"],
+    ["gerbera", 92, 272, 32, "yellow"],
+    ["gerbera", 310, 266, 32, "coral"],
+    ["gerbera", 54, 290, 26, "hot"],
+    ["gerbera", 348, 286, 26, "peach"],
+    ["rose", 202, 196, 34],
+    ["rose", 136, 214, 31],
+    ["rose", 268, 210, 31],
+    ["rose", 104, 236, 27],
+    ["rose", 300, 230, 27],
+    ["rose", 168, 252, 29],
+    ["rose", 236, 250, 29],
+    ["rose", 200, 290, 32],
+    ["rose", 138, 298, 29],
+    ["rose", 264, 296, 29],
   ];
 
   // hojas y paniculata detrás
-  [[70, 300, 200, 70], [330, 300, -20, 70], [40, 200, 215, 60], [360, 196, -35, 60],
-   [120, 330, 160, 58], [282, 330, 20, 58], [200, 120, 270, 50]].forEach(a => leaf(...a));
-  [[110, 140], [292, 132], [44, 290], [356, 286], [200, 140], [118, 200], [282, 196]].forEach(p => babysBreath(...p));
+  [[70, 300, 200, 74], [330, 300, -20, 74], [40, 200, 215, 64], [360, 196, -35, 64],
+   [120, 330, 160, 60], [282, 330, 20, 60], [200, 110, 270, 54], [150, 110, 235, 50],
+   [250, 110, -55, 50], [30, 260, 190, 56], [370, 256, -10, 56], [100, 150, 220, 54],
+   [300, 146, -40, 54]].forEach(a => leaf(...a));
+  [[110, 130], [292, 124], [44, 296], [356, 292], [200, 100], [118, 196], [282, 192],
+   [60, 160], [340, 154], [160, 120], [240, 116], [180, 226], [222, 228], [30, 220], [370, 214]].forEach(p => babysBreath(...p));
 
   items.forEach(it => stem(it[1], it[2]));
   items.sort((a, b) => a[2] - b[2]).forEach((it, i) => {
@@ -316,25 +400,23 @@
     else gerbera(it[1], it[2], it[3], it[4], delay);
   });
 
-  // --- interacción: corazones al tocar ---
+  // --- tocar una flor la hace moverse un poquito ---
   const svg = document.getElementById("bouquet");
-  const hearts = ["♥", "❀", "♥", "✿"];
   svg.addEventListener("pointerdown", e => {
     const f = e.target.closest(".flower");
     if (f) { f.classList.remove("pop"); void f.getBBox(); f.classList.add("pop"); }
-    const count = f ? 6 : 3;
-    for (let i = 0; i < count; i++) {
-      const h = document.createElement("span");
-      h.className = "heart";
-      h.textContent = hearts[i % hearts.length];
-      h.style.left = e.clientX + "px";
-      h.style.top = e.clientY + "px";
-      h.style.setProperty("--hx", (Math.random() * 120 - 60) + "px");
-      h.style.animationDelay = (i * 0.07) + "s";
-      h.style.fontSize = (16 + Math.random() * 14) + "px";
-      document.body.appendChild(h);
-      setTimeout(() => h.remove(), 2000);
-    }
+  });
+
+  // --- abrir la carta ---
+  const env = document.getElementById("env");
+  const screen = document.getElementById("letter");
+  const main = document.getElementById("main");
+  const quick = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  env.addEventListener("click", () => {
+    if (env.classList.contains("open")) return;
+    env.classList.add("open");
+    setTimeout(() => env.classList.add("out"), quick ? 0 : 650);
+    setTimeout(() => { screen.classList.add("gone"); main.classList.add("opened"); }, quick ? 0 : 1900);
   });
 
   // --- pétalos cayendo de fondo ---
