@@ -1,0 +1,355 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ramo para ti</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Un ramo de rosas rosas, tulipanes rosas y gerberas.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Petit+Formal+Script&family=Nunito:wght@400;600&display=swap">
+<style>
+  /* Layout: una sola columna centrada; tarjeta escrita a mano arriba, ramo SVG ocupando el ancho del teléfono */
+  :root {
+    --bg-top: #fdf1f3;
+    --bg-bottom: #f7dbe3;
+    --ink: #4a2233;
+    --ink-soft: #8a5468;
+    --accent: #d9467a;
+    --glow: rgba(255, 255, 255, .7);
+    --petal-fall: #f3a6bf;
+    --font-script: "Petit Formal Script", "Snell Roundhand", "Apple Chancery", cursive;
+    --font-body: "Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg-top: #2b1622; --bg-bottom: #1a0d15; --ink: #fbe4ec; --ink-soft: #d7a6b8;
+      --accent: #ff7fa8; --glow: rgba(255, 170, 200, .16); --petal-fall: #c9628a; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg-top: #2b1622; --bg-bottom: #1a0d15; --ink: #fbe4ec; --ink-soft: #d7a6b8;
+    --accent: #ff7fa8; --glow: rgba(255, 170, 200, .16); --petal-fall: #c9628a; color-scheme: dark;
+  }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: linear-gradient(180deg, var(--bg-top), var(--bg-bottom)) fixed;
+    background-color: var(--bg-bottom);
+    color: var(--ink);
+    font-family: var(--font-body);
+    overflow-x: hidden;
+    -webkit-tap-highlight-color: transparent;
+  }
+  main {
+    min-height: 100%;
+    box-sizing: border-box;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 4px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 20px 28px;
+    position: relative; z-index: 1;
+  }
+  header { text-align: center; display: grid; gap: 2px; }
+  h1 {
+    font-family: var(--font-script);
+    font-weight: 400;
+    font-size: clamp(2.6rem, 11vw, 3.8rem);
+    line-height: 1.15;
+    margin: 0;
+    color: var(--accent);
+    text-wrap: balance;
+  }
+  .sub { margin: 0; font-size: 1rem; color: var(--ink-soft); letter-spacing: .02em; }
+  .stage { position: relative; width: min(100%, 460px); }
+  .stage::before {
+    content: ""; position: absolute; inset: 8% 6% 30%;
+    background: radial-gradient(closest-side, var(--glow), transparent);
+    border-radius: 50%; pointer-events: none;
+  }
+  svg.bouquet { display: block; width: 100%; height: auto; position: relative; cursor: pointer; touch-action: manipulation; }
+  .note {
+    margin: 0; text-align: center; font-size: .92rem; color: var(--ink-soft);
+    max-width: 30ch;
+  }
+  .note b { color: var(--accent); font-weight: 600; }
+
+  /* animaciones */
+  .sway { transform-box: fill-box; transform-origin: 50% 100%; animation: sway 7s ease-in-out infinite; }
+  @keyframes sway { 0%,100% { transform: rotate(-1.2deg); } 50% { transform: rotate(1.2deg); } }
+  .bloom { transform-box: fill-box; transform-origin: center; animation: bloom 1.1s cubic-bezier(.2,.9,.3,1.2) both; }
+  @keyframes bloom { from { transform: scale(.2); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .flower { transform-box: fill-box; transform-origin: center; transition: transform .35s ease; }
+  .flower.pop { animation: pop .6s ease; }
+  @keyframes pop { 0% { transform: scale(1); } 40% { transform: scale(1.12) rotate(4deg); } 100% { transform: scale(1); } }
+
+  .fall { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
+  .fall span {
+    position: absolute; top: -30px; width: 12px; height: 16px;
+    background: var(--petal-fall); border-radius: 80% 0 80% 0; opacity: .55;
+    animation: drift linear infinite;
+  }
+  @keyframes drift {
+    0% { transform: translate(0, -5vh) rotate(0); }
+    100% { transform: translate(var(--dx, 40px), 110vh) rotate(540deg); }
+  }
+  .heart {
+    position: fixed; pointer-events: none; z-index: 5; font-size: 22px; line-height: 1;
+    color: var(--accent); animation: rise 1.6s ease-out forwards;
+  }
+  @keyframes rise {
+    0% { transform: translate(-50%, -50%) scale(.4); opacity: 0; }
+    15% { opacity: 1; }
+    100% { transform: translate(calc(-50% + var(--hx)), calc(-50% - 120px)) scale(1.1); opacity: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .sway, .bloom, .fall span, .flower.pop { animation: none !important; }
+    .fall { display: none; }
+  }
+</style>
+
+<div class="fall" id="fall" aria-hidden="true"></div>
+<main>
+  <header>
+    <h1>Para ti</h1>
+    <p class="sub">rosas, tulipanes y gerberas</p>
+  </header>
+  <div class="stage">
+    <svg class="bouquet" id="bouquet" viewBox="0 0 400 560" role="img"
+         aria-label="Ramo de rosas rosas, tulipanes rosas y gerberas envuelto en papel rosa con un lazo">
+      <defs>
+        <radialGradient id="gRose" cx="50%" cy="45%" r="60%">
+          <stop offset="0" stop-color="#ffd6e3"/><stop offset=".55" stop-color="#f58fb1"/><stop offset="1" stop-color="#d9557f"/>
+        </radialGradient>
+        <radialGradient id="gRoseIn" cx="45%" cy="40%" r="60%">
+          <stop offset="0" stop-color="#ffe9f0"/><stop offset="1" stop-color="#f07aa2"/>
+        </radialGradient>
+        <linearGradient id="gTulip" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#ffc2d6"/><stop offset=".6" stop-color="#f27aa3"/><stop offset="1" stop-color="#c94a76"/>
+        </linearGradient>
+        <linearGradient id="gTulipBack" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#f594b5"/><stop offset="1" stop-color="#b23c67"/>
+        </linearGradient>
+        <linearGradient id="gLeaf" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#7cbf5a"/><stop offset="1" stop-color="#3f7a36"/>
+        </linearGradient>
+        <linearGradient id="gPaperBack" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#f3c2d0"/><stop offset=".5" stop-color="#fbe1e8"/><stop offset="1" stop-color="#eab3c4"/>
+        </linearGradient>
+        <linearGradient id="gPaperFront" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#f7cfdb"/><stop offset=".45" stop-color="#fff2f5"/><stop offset="1" stop-color="#f0bccb"/>
+        </linearGradient>
+        <linearGradient id="gRibbon" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#f06292"/><stop offset="1" stop-color="#c2185b"/>
+        </linearGradient>
+      </defs>
+      <g class="sway" id="whole">
+        <path d="M28 262 Q200 220 372 262 L238 520 L162 520 Z" fill="url(#gPaperBack)"/>
+        <path d="M28 262 Q200 220 372 262" fill="none" stroke="#e7a4b9" stroke-width="2"/>
+        <g id="stems"></g>
+        <g id="leaves"></g>
+        <g id="flowers"></g>
+        <!-- papel delantero -->
+        <path d="M42 318 Q120 352 200 342 Q280 352 358 318 L240 548 L160 548 Z" fill="url(#gPaperFront)"/>
+        <path d="M200 342 L200 548 M120 336 L176 548 M280 336 L224 548" stroke="#efc0cf" stroke-width="2" fill="none" opacity=".8"/>
+        <path d="M42 318 Q120 352 200 342 Q280 352 358 318" fill="none" stroke="#e9a9bd" stroke-width="2.5"/>
+        <!-- lazo -->
+        <g transform="translate(200 452)">
+          <path d="M-6 6 Q-30 50 -44 92 L-26 86 L-18 100 Q-8 52 4 10 Z" fill="url(#gRibbon)"/>
+          <path d="M6 6 Q30 50 46 88 L28 84 L22 98 Q8 52 -4 10 Z" fill="url(#gRibbon)"/>
+          <path d="M0 0 C-30 -34 -70 -26 -62 2 C-56 24 -24 16 0 0 Z" fill="url(#gRibbon)"/>
+          <path d="M0 0 C30 -34 70 -26 62 2 C56 24 24 16 0 0 Z" fill="url(#gRibbon)"/>
+          <path d="M-8 -2 C-30 -20 -52 -16 -50 0" fill="none" stroke="#ff9cbe" stroke-width="2" opacity=".7"/>
+          <path d="M8 -2 C30 -20 52 -16 50 0" fill="none" stroke="#ff9cbe" stroke-width="2" opacity=".7"/>
+          <ellipse cx="0" cy="2" rx="11" ry="10" fill="#d81b60"/>
+          <ellipse cx="-3" cy="-1" rx="4" ry="3" fill="#ff8fb6" opacity=".7"/>
+        </g>
+      </g>
+    </svg>
+  </div>
+  <p class="note">Toca una flor <b>♥</b></p>
+</main>
+
+<script>
+(() => {
+  const NS = "http://www.w3.org/2000/svg";
+  const el = (tag, attrs = {}, parent) => {
+    const n = document.createElementNS(NS, tag);
+    for (const k in attrs) n.setAttribute(k, attrs[k]);
+    if (parent) parent.appendChild(n);
+    return n;
+  };
+  // generador pseudoaleatorio fijo: el ramo sale igual cada vez
+  let seed = 7;
+  const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+
+  const B = { x: 200, y: 440 }; // punto donde se atan los tallos
+  const stems = document.getElementById("stems");
+  const leaves = document.getElementById("leaves");
+  const flowers = document.getElementById("flowers");
+
+  function stem(x, y) {
+    const cx = (x + B.x) / 2 + (x - B.x) * 0.15;
+    const cy = (y + B.y) / 2;
+    el("path", { d: `M${x} ${y} Q${cx} ${cy} ${B.x + (x - B.x) * 0.08} ${B.y}`,
+      stroke: "#4f8a3c", "stroke-width": 4, fill: "none", "stroke-linecap": "round" }, stems);
+  }
+
+  function leaf(x, y, angle, len) {
+    const g = el("g", { transform: `translate(${x} ${y}) rotate(${angle})` }, leaves);
+    const w = len * 0.28;
+    el("path", { d: `M0 0 Q${len * 0.45} ${-w} ${len} 0 Q${len * 0.45} ${w} 0 0 Z`, fill: "url(#gLeaf)" }, g);
+    el("path", { d: `M2 0 Q${len * 0.5} -2 ${len * 0.95} 0`, stroke: "#2f5f2a", "stroke-width": 1.2, fill: "none", opacity: .6 }, g);
+  }
+
+  function wrapFlower(x, y, delay) {
+    const outer = el("g", { transform: `translate(${x} ${y})` }, flowers);
+    const bloom = el("g", { class: "bloom", style: `animation-delay:${delay}s` }, outer);
+    const f = el("g", { class: "flower" }, bloom);
+    return f;
+  }
+
+  function rose(x, y, r, delay) {
+    const g = wrapFlower(x, y, delay);
+    const rot = rnd() * 360;
+    const inner = el("g", { transform: `rotate(${rot})` }, g);
+    for (let i = 0; i < 5; i++) {
+      const a = (i / 5) * Math.PI * 2;
+      el("ellipse", { cx: Math.cos(a) * r * .42, cy: Math.sin(a) * r * .42, rx: r * .62, ry: r * .54,
+        transform: `rotate(${(a * 180) / Math.PI} ${Math.cos(a) * r * .42} ${Math.sin(a) * r * .42})`,
+        fill: "url(#gRose)", stroke: "#c24b74", "stroke-width": 1 }, inner);
+    }
+    for (let i = 0; i < 4; i++) {
+      const a = (i / 4) * Math.PI * 2 + .6;
+      el("ellipse", { cx: Math.cos(a) * r * .22, cy: Math.sin(a) * r * .22, rx: r * .44, ry: r * .38,
+        fill: "url(#gRoseIn)", stroke: "#cf5a83", "stroke-width": 1 }, inner);
+    }
+    el("circle", { r: r * .3, fill: "#f27ea6", stroke: "#bd3f6a", "stroke-width": 1 }, inner);
+    // espiral del centro
+    let d = "M0 0";
+    for (let t = 0; t < Math.PI * 5; t += .25) {
+      const rr = (t / (Math.PI * 5)) * r * .3;
+      d += ` L${(Math.cos(t) * rr).toFixed(1)} ${(Math.sin(t) * rr).toFixed(1)}`;
+    }
+    el("path", { d, fill: "none", stroke: "#a8325a", "stroke-width": 1.4, "stroke-linecap": "round" }, inner);
+  }
+
+  function tulip(x, y, s, rot, delay) {
+    const g = wrapFlower(x, y, delay);
+    const t = el("g", { transform: `rotate(${rot}) scale(${s})` }, g);
+    const h = 54, w = 40;
+    el("path", { d: `M0 ${-h * .5} C${w * .55} ${-h * .45} ${w * .55} ${h * .2} 0 ${h * .45} C${-w * .55} ${h * .2} ${-w * .55} ${-h * .45} 0 ${-h * .5} Z`,
+      fill: "url(#gTulipBack)" }, t);
+    el("path", { d: `M${-w * .52} ${-h * .42} C${-w * .62} ${h * .15} ${-w * .2} ${h * .48} 0 ${h * .46} C${w * .05} ${h * .1} ${-w * .1} ${-h * .25} ${-w * .52} ${-h * .42} Z`,
+      fill: "url(#gTulip)", stroke: "#c34a74", "stroke-width": .8 }, t);
+    el("path", { d: `M${w * .52} ${-h * .42} C${w * .62} ${h * .15} ${w * .2} ${h * .48} 0 ${h * .46} C${-w * .05} ${h * .1} ${w * .1} ${-h * .25} ${w * .52} ${-h * .42} Z`,
+      fill: "url(#gTulip)", stroke: "#c34a74", "stroke-width": .8 }, t);
+    el("path", { d: `M0 ${-h * .46} C${w * .34} ${-h * .1} ${w * .3} ${h * .38} 0 ${h * .48} C${-w * .3} ${h * .38} ${-w * .34} ${-h * .1} 0 ${-h * .46} Z`,
+      fill: "url(#gTulip)", stroke: "#c34a74", "stroke-width": .8 }, t);
+    el("path", { d: `M-3 ${-h * .3} Q-6 0 -2 ${h * .3}`, stroke: "#ffe0ea", "stroke-width": 2, fill: "none", opacity: .7, "stroke-linecap": "round" }, t);
+  }
+
+  const GERB = {
+    coral:  { a: "#ff7a59", b: "#ff9d7e", c: "#5b2b14" },
+    yellow: { a: "#ffc928", b: "#ffe066", c: "#6b4410" },
+    hot:    { a: "#ef3f7a", b: "#ff7aa6", c: "#4a1a2a" },
+    peach:  { a: "#ffb08a", b: "#ffd1b8", c: "#7a4a1a" },
+  };
+  function gerbera(x, y, r, col, delay) {
+    const c = GERB[col];
+    const g = wrapFlower(x, y, delay);
+    const n = 24, off = rnd() * 15;
+    for (let i = 0; i < n; i++) {
+      const a = (i / n) * 360 + off;
+      el("ellipse", { cx: 0, cy: -r * .58, rx: r * .15, ry: r * .44, fill: c.a, transform: `rotate(${a})` }, g);
+    }
+    for (let i = 0; i < n; i++) {
+      const a = (i / n) * 360 + off + 360 / n / 2;
+      el("ellipse", { cx: 0, cy: -r * .48, rx: r * .11, ry: r * .32, fill: c.b, transform: `rotate(${a})` }, g);
+    }
+    el("circle", { r: r * .3, fill: "#9bbf3a" }, g);
+    el("circle", { r: r * .22, fill: c.c }, g);
+    for (let i = 0; i < 18; i++) {
+      const a = (i / 18) * Math.PI * 2;
+      el("circle", { cx: Math.cos(a) * r * .27, cy: Math.sin(a) * r * .27, r: 1.6, fill: "#ffe27a" }, g);
+    }
+  }
+
+  function babysBreath(x, y) {
+    const g = el("g", { transform: `translate(${x} ${y})` }, leaves);
+    for (let i = 0; i < 7; i++) {
+      const a = rnd() * Math.PI * 2, d = rnd() * 14;
+      el("line", { x1: 0, y1: 8, x2: Math.cos(a) * d, y2: Math.sin(a) * d, stroke: "#7aa35a", "stroke-width": .8 }, g);
+      el("circle", { cx: Math.cos(a) * d, cy: Math.sin(a) * d, r: 2.4 + rnd() * 1.2, fill: "#fffafc", stroke: "#f1d4de", "stroke-width": .6 }, g);
+    }
+  }
+
+  // --- composición ---
+  const items = [
+    // tipo, x, y, extra
+    ["tulip", 200, 78, 1, 0],
+    ["tulip", 128, 112, .95, -18],
+    ["tulip", 276, 104, .95, 16],
+    ["tulip", 58, 236, .9, -42],
+    ["tulip", 344, 228, .9, 40],
+    ["gerbera", 82, 176, 36, "coral"],
+    ["gerbera", 318, 166, 36, "yellow"],
+    ["gerbera", 166, 158, 34, "hot"],
+    ["gerbera", 240, 150, 33, "peach"],
+    ["gerbera", 96, 278, 32, "yellow"],
+    ["gerbera", 308, 272, 32, "coral"],
+    ["rose", 202, 206, 34],
+    ["rose", 138, 228, 31],
+    ["rose", 268, 222, 31],
+    ["rose", 200, 272, 33],
+    ["rose", 150, 296, 29],
+    ["rose", 252, 296, 29],
+  ];
+
+  // hojas y paniculata detrás
+  [[70, 300, 200, 70], [330, 300, -20, 70], [40, 200, 215, 60], [360, 196, -35, 60],
+   [120, 330, 160, 58], [282, 330, 20, 58], [200, 120, 270, 50]].forEach(a => leaf(...a));
+  [[110, 140], [292, 132], [44, 290], [356, 286], [200, 140], [118, 200], [282, 196]].forEach(p => babysBreath(...p));
+
+  items.forEach(it => stem(it[1], it[2]));
+  items.sort((a, b) => a[2] - b[2]).forEach((it, i) => {
+    const delay = 0.15 + i * 0.09;
+    if (it[0] === "rose") rose(it[1], it[2], it[3], delay);
+    else if (it[0] === "tulip") tulip(it[1], it[2], it[3], it[4], delay);
+    else gerbera(it[1], it[2], it[3], it[4], delay);
+  });
+
+  // --- interacción: corazones al tocar ---
+  const svg = document.getElementById("bouquet");
+  const hearts = ["♥", "❀", "♥", "✿"];
+  svg.addEventListener("pointerdown", e => {
+    const f = e.target.closest(".flower");
+    if (f) { f.classList.remove("pop"); void f.getBBox(); f.classList.add("pop"); }
+    const count = f ? 6 : 3;
+    for (let i = 0; i < count; i++) {
+      const h = document.createElement("span");
+      h.className = "heart";
+      h.textContent = hearts[i % hearts.length];
+      h.style.left = e.clientX + "px";
+      h.style.top = e.clientY + "px";
+      h.style.setProperty("--hx", (Math.random() * 120 - 60) + "px");
+      h.style.animationDelay = (i * 0.07) + "s";
+      h.style.fontSize = (16 + Math.random() * 14) + "px";
+      document.body.appendChild(h);
+      setTimeout(() => h.remove(), 2000);
+    }
+  });
+
+  // --- pétalos cayendo de fondo ---
+  const fall = document.getElementById("fall");
+  for (let i = 0; i < 14; i++) {
+    const p = document.createElement("span");
+    p.style.left = (Math.random() * 100) + "%";
+    p.style.animationDuration = (9 + Math.random() * 9) + "s";
+    p.style.animationDelay = (-Math.random() * 18) + "s";
+    p.style.setProperty("--dx", (Math.random() * 120 - 60) + "px");
+    const s = .6 + Math.random() * .7;
+    p.style.width = 12 * s + "px"; p.style.height = 16 * s + "px";
+    fall.appendChild(p);
+  }
+})();
+</script>
+</html>
